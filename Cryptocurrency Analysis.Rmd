@@ -1,0 +1,73 @@
+---
+title: "Manipulating Cryptocurrency Data with R"
+output: html_notebook
+  
+  
+---
+<font size="14"> Preface: </font>
+
+In this short document, we aim to perform basic data manipulations of the 
+main cryptocurrencies in the market using the R language to cleanse the data
+so it can be later on transformed into into meaningful findings for the user. 
+As a step by step guide, the user is 
+free to follow the examples with the code given as well as modify it for his own
+personal preferences.
+
+
+Stage 1 - Accessing and Importing the Data
+
+In order to have access to the cryptocurrencies available, we have API's which
+make the job considerably easier.
+There are several choices from which you can derive the data from, for example
+you can use the Coinbase API database of crypto by utilizing the following code:
+
+```{r}
+rm(list = ls())  # reset global variables
+#import the libraries we need
+library(jsonlite)
+library(glue)
+```
+
+(Note: for any packages missing on your behalf, you can use the sample code of
+package.install('name') to be able to obtain access to it later on. 
+
+After importing the libraries, we retrieve the data from the available JSON 
+database of Coinbase, and we assign the column names to each pair in the file
+and then write it to a csv file.
+
+```{r}
+# create a function to retrieve daily data
+retreive_daily_data <- function(pair, filename) {
+  url = glue("https://api.pro.coinbase.com/products/{pair}/candles?granularity=86400")
+  columnNames <- c('unix', 'low', 'high', 'open', 'close', glue('{pair} volume'))
+  mydata <- fromJSON(url) #retrieve the data from the JSON url
+  df <- as.data.frame(mydata) #define the dataframe for the assigned values
+  colnames(df) <- columnNames  # rename the columns
+  
+  write.csv(df, file = filename)
+}
+```
+
+Next, we want to access the file locally as a csv file. For our example, we have 
+chosen ADA (or Cardano) which is a public blockchain platform. It is open source
+and decentralized, with high expectations in the crypto market.
+
+```{r}
+newPair <- "ADA-USD"
+fileName <- glue("dailyData{newPair}.csv")  #Assigning the name for each value
+runFunc <- retreive_daily_data(newPair, filename = fileName)
+runFunc
+```
+
+By now you can see the file in your local system in the csv format. This is how
+it should look like, under the name dailyDataADA.csv. The file should be in your
+local directory:
+
+![Image of Excel file](Excel.png)
+
+
+If you explored the data, it is easy to distinguish unnecessary values or columns
+which need to be properly adjusted. This brings us to the next stage.
+
+
+
